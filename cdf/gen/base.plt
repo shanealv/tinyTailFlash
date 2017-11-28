@@ -1,6 +1,6 @@
 set term postscript eps color 20
 set output "cdf/gen/eps/TRACE.eps"
-set title "Dev. Tools Release (TRACE)"
+set title "TRACE"
 set xlabel "Latency (ms)"
 set yrange [0.95 : 1]
 set ylabel "CDF (Percentile)"
