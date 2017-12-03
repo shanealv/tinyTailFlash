@@ -62,3 +62,5 @@ ssd
 statistic.dat
 data/raw-data
 
+# Visual Studio Code
+.vscode/

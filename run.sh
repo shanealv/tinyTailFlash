@@ -1,5 +1,6 @@
 declare -a configs=("nogc" "def" "pbl" "gtr" "rgc")
-declare -a traces=("DTRS")
+declare -a traces=("DTRS" "OG" "Exchange" "Radius" "DevToolReleaseServer" "MSNStorageMetaDataServer" "MSNStorageServer")
+declare -a stimes=("43200000378000" "0" "678981000" "46071000" "4466882000" "499041000" "288430000")
 declare basePlt=cdf/gen/base.plt
 declare dat=cdf/gen/dat
 declare eps=cdf/gen/eps
@@ -19,8 +20,11 @@ mkdir -p $eps
 mkdir -p $plt
 
 # for all traces
-for trace in "${traces[@]}"
+for index in ${!traces[*]};
 do
+	trace=${traces[$index]}
+	stime=${stimes[$index]}
+	export stats_time=$stime
 	# generate the data output folder for the trace
 	mkdir $dat/$trace 
 

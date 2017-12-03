@@ -90,7 +90,11 @@ struct ssd_info *initiation(struct ssd_info *ssd)
    strcpy_s(ssd->statisticfilename,16,"statistic10.dat");
 
    strcpy_s(ssd->statisticfilename2 ,16,"statistic2.dat");*/
-   ssd->stats_time = 0;
+   char* env_time = getenv("stats_time");
+   if (env_time)
+      ssd->stats_time = atoi(env_time);
+   else
+      ssd->stats_time = 0;
    
    strncpy(ssd->parameterfilename,"page.parameters",16);
    //strncpy(ssd->tracefilename,"example.ascii",25);
