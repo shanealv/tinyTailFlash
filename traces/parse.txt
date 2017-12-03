@@ -1,0 +1,20 @@
+Parsing raw/24Hour_RADIUS.08-30-2007.02-49-AM.csv...
+Total Lines: 2995140  R: 6668     W: 49089    R+W: 55757  
+Total IO:    00.019%  R: 00.120%  W: 00.880%
+Most Common Device is 0 with 27879 iops (00.50001%)
+Parsing raw/Exchange.12-13-2007.04-01-AM.trace.csv...
+Total Lines: 1087034  R: 501197   W: 489467   R+W: 990664 
+Total IO:    00.911%  R: 00.506%  W: 00.494%
+Most Common Device is 8 with 144782 iops (00.14615%)
+Parsing raw/DevDivRelease.03-06-2008.10-22-AM.trace.csv...
+Total Lines: 3414512  R: 1608449  W: 206812   R+W: 1815261
+Total IO:    00.532%  R: 00.886%  W: 00.114%
+Most Common Device is 12 with 646 iops (00.00036%)
+Parsing raw/CFS.2008-03-10.12-56.trace.csv.csv...
+Total Lines: 271900   R: 115523   W: 40511    R+W: 156034 
+Total IO:    00.574%  R: 00.740%  W: 00.260%
+Most Common Device is 8 with 8218 iops (00.05267%)
+Parsing raw/MSNFS.2008-03-10.03-03.trace.csv.csv...
+Total Lines: 1685152  R: 1340918  W: 344204   R+W: 1685122
+Total IO:    01.000%  R: 00.796%  W: 00.204%
+Most Common Device is 0 with 63654 iops (00.03777%)

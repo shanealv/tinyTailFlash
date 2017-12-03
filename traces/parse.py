@@ -27,45 +27,98 @@ def micro_to_nano(microsecs):
     return microsecs + "000"
 
 
+def scan_trace(file_name, on_visit):
+    '''
+    Scans a trace CSV file
+    Calls on_visit(record, device) on each R/W line
+    '''
+    reads = 0
+    writes = 0
+    ops = 0
+    devices = dict()
+    with open(file_name) as trace:
+        end_of_header = False
+        for next_line in trace:
+            # trim whitespace
+            line = " ".join(next_line.split())
+
+            # skip header
+            if not end_of_header:
+                if line.startswith("EndHeader"):
+                    end_of_header = True
+                continue
+
+            # filter reads and writes
+            ops += 1
+            if line.startswith("DiskRead"):
+                reads += 1
+            elif line.startswith("DiskWrite"):
+                writes += 1
+            else:
+                continue
+
+            # extra device and add to counter
+            record = line.split(", ")
+            if len(record) < 9:
+                continue
+            device = record[8]
+            if device in devices:
+                devices[device] += 1
+            else:
+                devices[device] = 1
+
+            on_visit(record, device)
+    return (reads, writes, ops, devices)
+
+
 def main(in_path, out_path):
     '''
     Extracts SSDSim compadible trace data
     '''
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    with open(in_path) as in_file, open(out_path, 'w') as out_file:
-        end_of_header = False
-        for next_line in in_file:
-            # Remove Excess Whitespace
-            line = " ".join(next_line.split())
+    log = logging.getLogger(__name__)
+    log.info("Parsing %s...", in_path)
 
-            # Process Header
-            if not end_of_header:
-                if line.startswith("DiskRead"):
-                    logger.debug(line)
-                elif line.startswith("EndHeader"):
-                    end_of_header = True
-                continue
+    # get basic stats
+    reads, writes, ops, devices = scan_trace(in_path, lambda record, device: None)
+    total = reads + writes
+    t_ratio, r_ratio, w_ratio = (total/ops, reads/total, writes/total)
+    log.info("Total Lines: %-7d  R: %-7d  W: %-7d  R+W: %-7d", ops, reads, writes, total)
+    log.info("Total IO:    %06.3f%%  R: %06.3f%%  W: %06.3f%%", t_ratio, r_ratio, w_ratio)
 
-            # extract the record and parse its fields
-            if line.startswith("DiskWrite") or line.startswith("DiskRead"):
-                record = line.split(", ")
-                # format:   time   device   offset   size   op
-                try:
-                    fields = [micro_to_nano(record[1]),
-                              record[8],
-                              hexadecimal_to_decimal(record[5]),
-                              hexadecimal_to_decimal(record[6]),
-                              operation_to_int(record[0])]
-                except IndexError:
-                    logger.debug(line)
-                    continue
-                new_line = " ".join(fields)
-                out_file.write(new_line + "\n")
+    max_device = -1
+    max_io = 0
+    for device in devices:
+        if devices[device] > max_io:
+            max_device = device
+
+    log.info("Most Common Device is %s with %d iops (%08.5f%%)",
+             max_device, devices[max_device], devices[max_device] / total)
+
+    # run again but extract records
+    with open(out_path, 'w') as gen:
+        def visit(record, device):
+            '''
+            Saves the records for the most common device
+            '''
+            if device != max_device:
+                return
+            fields = [micro_to_nano(record[1]),
+                      record[8],
+                      hexadecimal_to_decimal(record[5]),
+                      hexadecimal_to_decimal(record[6]),
+                      operation_to_int(record[0])]
+            new_line = " ".join(fields)
+            gen.write(new_line + "\n")
+
+        scan_trace(in_path, visit)
 
 
 if __name__ == "__main__":
     if len(sys.argv) is 1:
+        log = logging.getLogger(__name__)
+        log.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler(sys.stdout)
+        log.addHandler(ch)
         main("raw/24Hour_RADIUS.08-30-2007.02-49-AM.csv", "Radius.trace")
         main("raw/Exchange.12-13-2007.04-01-AM.trace.csv", "Exchange.trace")
         main("raw/DevDivRelease.03-06-2008.10-22-AM.trace.csv", "DevToolReleaseServer.trace")
